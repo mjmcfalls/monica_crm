@@ -1,0 +1,3 @@
+FROM traefik:v2.3
+COPY ./pki/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates

@@ -1,0 +1,14 @@
+[tls.stores]
+  [tls.stores.default]
+    [tls.stores.default.defaultCertificate]
+      certFile = "/configuration/pki/root.crt"
+      keyFile  = "/configuration/pki/root.key"
+
+[[tls.certificates]] #first certificate
+   certFile = "/configuration/pki/root.crt"
+   keyFile = "/configuration/pki/root.key"
+
+[[tls.certificates]] #second certificate
+   certFile = "/configuration/pki/intermediate_ca.crt"
+   keyFile = "/configuration/pki/intermediate.key"
+

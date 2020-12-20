@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /pki/root_ca.crt
+      keyFile: /pki/root.key

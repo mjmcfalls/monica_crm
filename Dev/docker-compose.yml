@@ -9,7 +9,8 @@ services:
       dockerfile: Dockerfile_traefik.dev
     command:
       - "--log.level=DEBUG"
-      - "--api.insecure=true"
+      - "--api.insecure=false"
+      - "--api.dashboard=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -19,8 +20,6 @@ services:
       - "--certificatesresolvers.myresolver.acme.caserver=https://10.255.255.52:9000/acme/acme/directory"
       - "--certificatesresolvers.myresolver.acme.email=postmaster@example.com"
       - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
-      # - "--providers.file.directory=/configuration/"
-      # - "--providers.file.watch=true"
       - "--providers.docker.network=web"
     ports:
       - "80:80"
@@ -30,10 +29,7 @@ services:
       - web
     volumes:
       - ./letsencrypt/acme.json:/acme.json
-      # - ./traefik.toml:/traefik.toml
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # - ./configuration/:/configuration/ 
-      # - ./pki/certs/:/pki/:ro
   whoami:
     image: "traefik/whoami"
     container_name: "simple-service"
@@ -41,17 +37,15 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.tls=true"
       - "traefik.http.middlewares.whoami-https_redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.whoami-http.entrypoints=web"
       - "traefik.http.routers.whoami-http.middlewares=whoami-https_redirect"
       - "traefik.http.routers.whoami-http.rule=Host(`whoami.miniguild.com`)"
-
+      - "traefik.http.routers.whoami-https.tls=true"
       - "traefik.http.routers.whoami-https.entrypoints=websecure"
       - "traefik.http.routers.whoami-https.tls.certresolver=myresolver"
       - "traefik.http.routers.whoami-https.rule=Host(`whoami.miniguild.com`)"
       - "traefik.docker.network=web"
-      # 
   db:
     image: mysql:5.7
     env_file:
@@ -68,28 +62,31 @@ services:
     restart: unless-stopped
     networks:
       - dbnet
-  # app:
-  #   image: monica
-  #   depends_on:
-  #     - db
-  #   # expose:
-  #   #   - 80/tcp
-  #   #   - 
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - data:/var/www/html/storage
-  #   restart: unless-stopped
-  #   networks:
-  #     - web
-  #     - dbnet
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.app.rule=Host(`app.miniguild.com`)"
-  #     - "traefik.http.routers.app.entrypoints=websecure"
-  #     - "traefik.http.routers.app.tls.certresolver=myresolver"
-  #     - "traefik.http.routers.app.tls=true"
-  #     - "traefik.docker.network=web"
+    labels:
+      - traefik.enable=false
+  app:
+    image: monica
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - data:/var/www/html/storage
+    restart: unless-stopped
+    networks:
+      - web
+      - dbnet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.app-https_redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.app-http.entrypoints=web"
+      - "traefik.http.routers.app-http.middlewares=app-https_redirect"
+      - "traefik.http.routers.app-http.rule=Host(`app.miniguild.com`)"
+      - "traefik.http.routers.app-https.tls=true"
+      - "traefik.http.routers.app-https.entrypoints=websecure"
+      - "traefik.http.routers.app-https.tls.certresolver=myresolver"
+      - "traefik.http.routers.app-https.rule=Host(`app.miniguild.com`)"
+      - "traefik.docker.network=web"
 
 volumes:
   data:
@@ -98,4 +95,6 @@ volumes:
     name: mysql
 networks:
   web:
+    name: web
   dbnet:
+    name: dbnet

@@ -1,0 +1,306 @@
+{
+    "ipcMode": null,
+    "executionRoleArn": "ADD EXECUTION ROLE ARN",
+    "containerDefinitions": [
+        {
+            "dnsSearchDomains": null,
+            "environmentFiles": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/MonicaCRM",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "entryPoint": [],
+            "portMappings": [],
+            "command": [],
+            "linuxParameters": null,
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "APP_DISABLE_SIGNUP",
+                    "value": "false"
+                },
+                {
+                    "name": "APP_KEY",
+                    "value": "CREATE-KEY"
+                },
+                {
+                    "name": "APP_TRUSTED_PROXIES",
+                    "value": "*"
+                },
+                {
+                    "name": "AWS_BUCKET",
+                    "value": "AWS S3 BUCKET"
+                },
+                {
+                    "name": "AWS_REGION",
+                    "value": "AWS REGION"
+                },
+                {
+                    "name": "AWS_KEY",
+                    "value": "AWS USER KEY"
+                },
+                {
+                    "name": "AWS_SECRET",
+                    "value": "AWS USER SECRET"
+                },
+                {
+                    "name": "AWS_SERVER",
+                    "value": ""
+                },
+                {
+                    "name": "DAV_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DB_PORT",
+                    "value": "3306"
+                },
+                {
+                    "name": "DB_DATABASE",
+                    "value": "DATABASE NAME"
+                },
+                {
+                    "name": "DB_HOST",
+                    "value": "AWS DB URI"
+                },
+                {
+                    "name": "DB_USERNAME",
+                    "value": "DATABASE USER NAME"
+                },
+                {
+                    "name": "DB_PASSWORD",
+                    "value": "DATABASE USER PASSWORD"
+                },
+                {
+                    "name": "DEFAULT_FILESYSTEM",
+                    "value": "s3"
+                },
+                {
+                    "name": "MAIL_ENCRYPTION",
+                    "value": "tls"
+                },
+                {
+                    "name": "MAIL_FROM_ADDRESS",
+                    "value": "EMAIL FROM ADDRESS"
+                },
+                {
+                    "name": "MAIL_FROM_NAME",
+                    "value": "MAIL FROM NAME"
+                },
+                {
+                    "name": "MAIL_HOST",
+                    "value": "SES SMTP URL"
+                },
+                {
+                    "name": "MAIL_MAILER",
+                    "value": "smtp"
+                },
+                {
+                    "name": "MAIL_USERNAME",
+                    "value": "SES MAIL USER ID"
+                },
+                {
+                    "name": "MAIL_PASSWORD",
+                    "value": "SES MAIL PASSWORD"
+                },
+                {
+                    "name": "MAIL_PORT",
+                    "value": "587"
+                },
+                {
+                    "name": "MFA_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DEFAULT_MAX_STORAGE_SIZE",
+                    "value": "2048"
+                }
+            ],
+            "resourceRequirements": null,
+            "ulimits": null,
+            "dnsServers": null,
+            "mountPoints": null,
+            "workingDirectory": null,
+            "secrets": null,
+            "dockerSecurityOptions": null,
+            "memoryReservation": 512,
+            "volumesFrom": null,
+            "stopTimeout": null,
+            "image": "monica",
+            "startTimeout": null,
+            "firelensConfiguration": null,
+            "dependsOn": null,
+            "disableNetworking": null,
+            "interactive": null,
+            "healthCheck": null,
+            "essential": true,
+            "links": [],
+            "hostname": null,
+            "extraHosts": null,
+            "pseudoTerminal": null,
+            "user": null,
+            "readonlyRootFilesystem": null,
+            "dockerLabels": {
+                "traefik.enable": "true",
+                "traefik.http.middlewares.app-https_redirect.redirectscheme.scheme": "https",
+                "traefik.http.routers.app-http.entrypoints": "app",
+                "traefik.http.routers.app-http.middlewares": "app-https_redirect",
+                "traefik.http.routers.app-http.rule": "Host(`DNS NAME`)",
+                "traefik.http.routers.app-https.tls": "true",
+                "traefik.http.routers.app-https.entrypoints": "appsecure",
+                "traefik.http.routers.app-https.tls.certresolver": "mytls",
+                "traefik.http.routers.app-https.rule":"Host(`DNS NAME`)"
+            },
+            "systemControls": null,
+            "privileged": null,
+            "name": "app",
+            "repositoryCredentials": {
+                "credentialsParameter": ""
+            }
+        },
+        {
+            "dnsSearchDomains": null,
+            "environmentFiles": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/MonicaCRM",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "entryPoint": null,
+            "portMappings": [
+                {
+                    "hostPort": 443,
+                    "protocol": "tcp",
+                    "containerPort": 443
+                },
+                {
+                    "hostPort": 8080,
+                    "protocol": "tcp",
+                    "containerPort": 8080
+                }
+            ],
+            "command": [],
+            "linuxParameters": null,
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "TRAEFIK_API_INSECURE",
+                    "value": "true"
+                },
+                {
+                    "name": "TRAEFIK_CERTIFICATESRESOLVERS_MYTLS_ACME_EMAIL",
+                    "value": "LETS ENCRYPT EMAIL"
+                },
+                {
+                    "name": "TRAEFIK_CERTIFICATESRESOLVERS_MYTLS_ACME_TLSCHALLENGE",
+                    "value": "true"
+                },
+                {
+                    "name": "TRAEFIK_CERTIFICATESRSOLVERS_MYTLS_ACME_STORAGE",
+                    "value": "/letsencrypt/acme.json"
+                },
+                {
+                    "name": "TRAEFIK_ENTRYPOINTS_APP_ADDRESS",
+                    "value": ":80"
+                },
+                {
+                    "name": "TRAEFIK_ENTRYPOINTS_APPSECURE_ADDRESS",
+                    "value": ":443"
+                },
+                {
+                    "name": "TRAEFIK_PROVIDERS_DOCKER",
+                    "value": "true"
+                },
+                {
+                    "name": "TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT",
+                    "value": "false"
+                }
+            ],
+            "resourceRequirements": null,
+            "ulimits": null,
+            "dnsServers": null,
+            "mountPoints": [
+                {
+                    "readOnly": true,
+                    "containerPath": "/var/run/docker.sock",
+                    "sourceVolume": "dockersock"
+                },
+                {
+                    "readOnly": null,
+                    "containerPath": "/letsencrypt",
+                    "sourceVolume": "letsencrypt"
+                }
+            ],
+            "workingDirectory": null,
+            "secrets": null,
+            "dockerSecurityOptions": null,
+            "memoryReservation": 512,
+            "volumesFrom": null,
+            "stopTimeout": null,
+            "image": "traefik:v2.3.0-rc2",
+            "startTimeout": null,
+            "firelensConfiguration": null,
+            "dependsOn": [
+                {
+                    "containerName": "app",
+                    "condition": "START"
+                }
+            ],
+            "disableNetworking": null,
+            "interactive": null,
+            "healthCheck": null,
+            "essential": true,
+            "links": null,
+            "hostname": null,
+            "extraHosts": null,
+            "pseudoTerminal": null,
+            "user": null,
+            "readonlyRootFilesystem": null,
+            "dockerLabels": null,
+            "systemControls": null,
+            "privileged": null,
+            "name": "traefik",
+            "repositoryCredentials": {
+                "credentialsParameter": ""
+            }
+        }
+    ],
+    "memory": null,
+    "taskRoleArn": "",
+    "family": "MonicaCRM",
+    "pidMode": null,
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "networkMode": null,
+    "cpu": null,
+    "inferenceAccelerators": null,
+    "proxyConfiguration": null,
+    "volumes": [
+        {
+            "efsVolumeConfiguration": null,
+            "name": "dockersock",
+            "host": {
+                "sourcePath": "/var/run/docker.sock"
+            },
+            "dockerVolumeConfiguration": null
+        },
+        {
+            "efsVolumeConfiguration": null,
+            "name": "letsencrypt",
+            "host": {
+                "sourcePath": "/letsencrypt"
+            },
+            "dockerVolumeConfiguration": null
+        }
+    ],
+    "placementConstraints": [],
+    "tags": []
+}

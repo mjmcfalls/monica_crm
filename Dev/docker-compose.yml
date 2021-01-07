@@ -17,7 +17,7 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.caserver=https://10.255.255.52:9000/acme/acme/directory"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://localIP:9000/acme/acme/directory"
       - "--certificatesresolvers.myresolver.acme.email=postmaster@example.com"
       - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
       - "--providers.docker.network=web"
@@ -40,11 +40,11 @@ services:
       - "traefik.http.middlewares.whoami-https_redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.whoami-http.entrypoints=web"
       - "traefik.http.routers.whoami-http.middlewares=whoami-https_redirect"
-      - "traefik.http.routers.whoami-http.rule=Host(`whoami.miniguild.com`)"
+      - "traefik.http.routers.whoami-http.rule=Host(`whoami.test.local`)"
       - "traefik.http.routers.whoami-https.tls=true"
       - "traefik.http.routers.whoami-https.entrypoints=websecure"
       - "traefik.http.routers.whoami-https.tls.certresolver=myresolver"
-      - "traefik.http.routers.whoami-https.rule=Host(`whoami.miniguild.com`)"
+      - "traefik.http.routers.whoami-https.rule=Host(`whoami.test.local`)"
       - "traefik.docker.network=web"
   db:
     image: mysql:5.7
@@ -81,11 +81,11 @@ services:
       - "traefik.http.middlewares.app-https_redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.app-http.entrypoints=web"
       - "traefik.http.routers.app-http.middlewares=app-https_redirect"
-      - "traefik.http.routers.app-http.rule=Host(`app.miniguild.com`)"
+      - "traefik.http.routers.app-http.rule=Host(`app.test.local`)"
       - "traefik.http.routers.app-https.tls=true"
       - "traefik.http.routers.app-https.entrypoints=websecure"
       - "traefik.http.routers.app-https.tls.certresolver=myresolver"
-      - "traefik.http.routers.app-https.rule=Host(`app.miniguild.com`)"
+      - "traefik.http.routers.app-https.rule=Host(`app.test.local`)"
       - "traefik.docker.network=web"
 
 volumes:

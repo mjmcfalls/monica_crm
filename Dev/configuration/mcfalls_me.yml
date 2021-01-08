@@ -1,0 +1,50 @@
+http:
+  routers:
+    dev:
+      rule: Host(`dev.miniguild.com`)
+      service: devservice
+      middlewares:
+        - "cors-headers"
+    www:
+      rule: Host(`www.miniguild.com`)
+      service: prodservice
+      middlewares:
+        - "cors-headers"
+        - "www-redirect"
+    barewww:
+      rule: Host(`miniguild.com`)
+      service: prodservice
+      middlewares:
+        - "cors-headers"
+
+  middlewares:
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+        accessControlAllowOriginList:
+          - "http://dev.miniguild.com"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+        customRequestHeaders:
+          Host: "dev.miniguild.com"
+    www-redirect:
+      redirectregex:
+        permanent: true
+        replacement: "https://miniguild.com/$${1}"
+        regex: "^https://www.miniguild.com/(.*)"
+
+  services:
+    devservice:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://mcfalls-me-www-test.s3-website.us-east-2.amazonaws.com"
+          
+    prodservice:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://mcfalls.me.s3-website.us-east-2.amazonaws.com"

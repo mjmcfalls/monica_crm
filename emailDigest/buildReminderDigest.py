@@ -1,10 +1,12 @@
 import logging
 import requests
 import re
-from datetime import datetime, timedelta
-import pytz
-from pytz import timezone
 import json
+import pandas as pd
+from datetime import datetime, timedelta
+# import pytz
+# from pytz import timezone
+
 
 envfile = '.env'
 contactsStub = "contacts"
@@ -51,23 +53,33 @@ def main():
 
             if contact['stay_in_touch_trigger_date']:
                 targetDate = datetime.strptime(contact['stay_in_touch_trigger_date'], '%Y-%m-%dT%H:%M:%SZ')
-                if targetDate.date() - cDatetime.date() <= timedelta(days=envDict['contactDays']):
-                    followups.append(contact)
+                days = targetDate.date() - cDatetime.date()
+                if days <= timedelta(days=envDict['contactDays']) and days > timedelta(days=0):
+                    # followups.append(contact)
+                    followups.append({'date':contact['stay_in_touch_trigger_date'].split('T')[0], 'event':"contact", 'firstname':contact["first_name"], 'lastname':contact["last_name"], 'days':days.days})
                     logging.info("{} {} - Next Contact: {}".format(contact["first_name"],contact["last_name"],contact['stay_in_touch_trigger_date'].split('T')[0]))
 
+    # logging.info(followups)
     # for item in followups:
         # logging.info("{} {} - Next Contact: {}".format(item["first_name"],item["last_name"],item['stay_in_touch_trigger_date'].split('T')[0]))
     for item in reminders:
         initial_date = datetime.strptime(item['initial_date'], '%Y-%m-%dT%H:%M:%SZ').replace(year=cDatetime.year)
         # logging.info("{}".format(initial_date.date() - cDatetime.date()))
         days = initial_date.date() - cDatetime.date()
-        if days <= timedelta(days=envDict['reminderDays']) and days > timedelta(days=0) :
+        if days <= timedelta(days=envDict['reminderDays']) and days > timedelta(days=0):
             # logging.info("{}".format(days.days))
-            logging.info("{} {} - {}: {} days on {}-{}".format(item['contact']["first_name"],item['contact']["last_name"],item['title'],days.days,initial_date.month,initial_date.day))
+            if re.search(r'birthday', item['title'], re.I):
+                event = "birthday"
+            else:
+                event = item['title']
+            followups.append({'date':initial_date.strftime('%Y-%m-%d'), 'event': event, 'firstname':item['contact']["first_name"], 'lastname':item['contact']["last_name"], 'days':days.days})
+            # logging.info("{} {} - {}: {} days on {}-{}".format(item['contact']["first_name"],item['contact']["last_name"],item['title'],days.days,initial_date.month,initial_date.day))
         # else:
             # logging.info("{} {} - {}: {} days on {}-{}".format(item['contact']["first_name"],item['contact']["last_name"],item['title'],days.days,initial_date.month,initial_date.day))
 
-
+    
+    df = pd.DataFrame(followups, columns=['date', 'event', 'firstname', 'lastname', 'days'])
+    print(df.head())
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,handlers=[logging.StreamHandler()], format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",)

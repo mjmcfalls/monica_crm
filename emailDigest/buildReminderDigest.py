@@ -54,7 +54,7 @@ def main():
             if contact['stay_in_touch_trigger_date']:
                 targetDate = datetime.strptime(contact['stay_in_touch_trigger_date'], '%Y-%m-%dT%H:%M:%SZ')
                 days = targetDate.date() - cDatetime.date()
-                if days <= timedelta(days=envDict['contactDays']) and days > timedelta(days=0):
+                if days <= timedelta(days=envDict['contactDays']) and days >= timedelta(days=0):
                     # followups.append(contact)
                     followups.append({'date':contact['stay_in_touch_trigger_date'].split('T')[0], 'event':"contact", 'firstname':contact["first_name"], 'lastname':contact["last_name"], 'days':days.days})
                     logging.info("{} {} - Next Contact: {}".format(contact["first_name"],contact["last_name"],contact['stay_in_touch_trigger_date'].split('T')[0]))
@@ -66,7 +66,7 @@ def main():
         initial_date = datetime.strptime(item['initial_date'], '%Y-%m-%dT%H:%M:%SZ').replace(year=cDatetime.year)
         # logging.info("{}".format(initial_date.date() - cDatetime.date()))
         days = initial_date.date() - cDatetime.date()
-        if days <= timedelta(days=envDict['reminderDays']) and days > timedelta(days=0):
+        if days <= timedelta(days=envDict['reminderDays']) and days >= timedelta(days=0):
             # logging.info("{}".format(days.days))
             if re.search(r'birthday', item['title'], re.I):
                 event = "birthday"

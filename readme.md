@@ -11,3 +11,8 @@ I added some additional configuration information for my AWS instance to appease
 
 Specifically, I noticed the reminders do not fire with the Aurora serverless DB.  I created a bash script to warm up the Aurora database before the reminders are scheduled to fire.  I believe this should temporarily help me.  
 I, also, used a larger reserved instance; the larger instance cost more, but the perceived increase responsiveness of the app was worth the additional costs for me.
+
+Crontab command on the linux host to run the daily schedules in the Monica container: 
+```/usr/bin/docker exec -it `docker ps | grep  monica | cut -d " " -f 1` php artisan schedule:run```
+
+I went with the linux host running the crontab, because I wanted a daily digest and not per person emails.  I have a separate python script in AWS Lambda that is triggered daily by AWS Eventbridge. 

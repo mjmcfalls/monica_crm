@@ -14,5 +14,5 @@ I added some additional configuration information for my AWS instance to appease
 I, also, used a larger reserved instance; the larger instance cost more, but the perceived increase responsiveness of the app was worth the additional costs for me.
 
 Crontab command on the linux host to run the daily schedules in the Monica container: 
-```/usr/bin/docker exec -it `docker ps | grep  monica | cut -d " " -f 1` php artisan schedule:run```
+```/usr/bin/docker exec `docker ps | grep  monica | cut -d " " -f 1` php artisan schedule:run```
 

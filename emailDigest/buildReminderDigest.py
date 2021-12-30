@@ -1,4 +1,5 @@
 import logging
+import math
 import requests
 import re
 import json
@@ -13,20 +14,20 @@ import email
 def getRemoteData(url, headers, payload):
     tempData = []
     response = requests.request("GET", url, headers=headers, data=payload)
-    # logging.info("Response Status: {}".format(response.status_code))
+    logging.debug("Response Status: {}".format(response.status_code))
 
     tempData.extend(response.json()['data'])
     nextUrl = response.json()['links']['next']
 
     while nextUrl:
         response = requests.request("GET", nextUrl, headers=headers, data=payload)
-        logging.info("Response Status: {}".format(response.status_code))
+        logging.debug("Response Status: {}".format(response.status_code))
         tempData.extend(response.json()['data'])
         nextUrl = response.json()['links']['next']
     
     return tempData
 
-def lambda_handler():
+def lambda_handler(event, context):
     envfile = '.env'
     contactsStub = "contacts"
     reminderStub = "reminders"
@@ -53,21 +54,32 @@ def lambda_handler():
     for contact in contacts: 
         if 'stay_in_touch_trigger_date' in contact:
             if contact['stay_in_touch_trigger_date']:
-                # logging.info("{} - {} {}".format(contact['stay_in_touch_trigger_date'], contact["first_name"], contact["last_name"]))
+                # logging.debug("{} - {} {}".format(contact['stay_in_touch_trigger_date'], contact["first_name"], contact["last_name"]))
                 targetDate = datetime.strptime(contact['stay_in_touch_trigger_date'], '%Y-%m-%dT%H:%M:%SZ')
                 days = targetDate.date() - cDatetime.date()
                 if days <= timedelta(days=envDict['contactDays']) and days >= timedelta(days=0):
                     # followups.append(contact)
                     followups.append({'date':contact['stay_in_touch_trigger_date'].split('T')[0], 'event':"contact", 'firstname':contact["first_name"], 'lastname':contact["last_name"], 'days':days.days})
-                    logging.info("{} {} - Next Contact: {}".format(contact["first_name"],contact["last_name"],contact['stay_in_touch_trigger_date'].split('T')[0]))
+                    logging.debug("{} {} - Next Contact: {}".format(contact["first_name"],contact["last_name"],contact['stay_in_touch_trigger_date'].split('T')[0]))
 
     # Process reminders (birthdays, etc)
     for item in reminders:
+        # logging.debug("{}".format(item))
         initial_date = datetime.strptime(item['initial_date'], '%Y-%m-%dT%H:%M:%SZ').replace(year=cDatetime.year)
-        # logging.info("{}".format(initial_date.date() - cDatetime.date()))
         days = initial_date.date() - cDatetime.date()
+        
+        logging.debug("{} - Initial date: {}".format(item['contact']["first_name"],initial_date.date()))
+        logging.debug("{} - {}".format(item['contact']["first_name"],initial_date.date() - cDatetime.date()))
+
+        if days.days < 0:
+            initial_date = datetime.strptime(item['initial_date'], '%Y-%m-%dT%H:%M:%SZ').replace(year=cDatetime.year+1)
+            days = initial_date.date() - cDatetime.date()
+        
+        logging.debug("{} - Initial date: {}".format(item['contact']["first_name"],initial_date.date()))
+        logging.debug("{} - {}".format(item['contact']["first_name"],initial_date.date() - cDatetime.date()))
+        
         if days <= timedelta(days=envDict['reminderDays']) and days >= timedelta(days=0):
-            # logging.info("{}".format(days.days))
+            logging.debug("{}".format(days.days))
             if re.search(r'birthday', item['title'], re.I):
                 event = "birthday"
             else:
@@ -76,8 +88,10 @@ def lambda_handler():
 
     # Create HTML rows from events
     events = sorted(followups, key = lambda i: i['date'])
+    for event in events:
+        logging.info("{}".format(event))
+
     for row in events:
-        # print(row)
         if row['days'] <= envDict['cardReminderDays'] and not re.search(r'contact', row['event'], re.I):
             htmlrow = "<tr style='background-color:#D1FEAA'><td>{}</td><td></td><td>{}</td><td></td><td>{}</td><td></td><td align='center'>{}</td></tr>".format(row['date'], row['event'].capitalize(), "{} {}".format(row['firstname'], row['lastname']), row['days'])
         else:
@@ -94,8 +108,6 @@ def lambda_handler():
     msg['To'] = envDict["receiver_email"]
     msg['Subject'] = "{} - {}".format(envDict["mail_subject"], cDatetime.strftime("%Y-%m-%d"))
     # message = "{}".format(''.join(header))
-    # print(type(header))
-    # print(header)
     msg.set_content(MIMEText(header, 'html'))
 
 
@@ -105,11 +117,11 @@ def lambda_handler():
         smtpObj.starttls()
         smtpObj.login(envDict["MAIL_USERNAME"], envDict['MAIL_PASSWORD'])
         smtpObj.send_message(msg)
-        logging.info("Successfully sent email")
+        logging.debug("Successfully sent email")
         results =  {"Success": 200}
 
     except Exception as e:
-        logging.info("Exception: {}".format(e))
+        logging.debug("Exception: {}".format(e))
         results = {"Internal Server Error": 500}
 
 
